@@ -12,6 +12,11 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  /* Cursors */
+  --cursor-dark: url("data:image/svg+xml;charset=utf-8,%3Csvg width='28' height='28' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform='rotate(20 20 20)'%3E%3Cpath d='M 20 20 L 80 45 L 55 55 L 45 80 Z' fill='%23ffffff' stroke='%23ffffff' stroke-width='16' stroke-linejoin='round' stroke-linecap='round' /%3E%3Cpath d='M 20 20 L 80 45 L 55 55 L 45 80 Z' fill='%23000000' stroke='%23000000' stroke-width='8' stroke-linejoin='round' stroke-linecap='round' /%3E%3C/g%3E%3C/svg%3E") 6 6, default;
+  --cursor-light: url("data:image/svg+xml;charset=utf-8,%3Csvg width='28' height='28' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform='rotate(20 20 20)'%3E%3Cpath d='M 20 20 L 80 45 L 55 55 L 45 80 Z' fill='%23000000' stroke='%23000000' stroke-width='16' stroke-linejoin='round' stroke-linecap='round' /%3E%3Cpath d='M 20 20 L 80 45 L 55 55 L 45 80 Z' fill='%23ffffff' stroke='%23ffffff' stroke-width='8' stroke-linejoin='round' stroke-linecap='round' /%3E%3C/g%3E%3C/svg%3E") 6 6, default;
+  --default-cursor: var(--cursor-dark);
+
   --mac-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Inter", Roboto, sans-serif;
   --mac-accent: #0a84ff;
   --mac-close: #ff5f56;
@@ -44,6 +49,8 @@ html, body {
   user-select: none;
   -webkit-user-select: none;
   -webkit-font-smoothing: antialiased;
+
+  cursor: var(--default-cursor);
 }
 
 /* macOS Scrollbars */
@@ -181,7 +188,7 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px 90px;
+  padding: 40px 20px 80px;
   box-sizing: border-box;
 }
 
@@ -362,7 +369,7 @@ body.search-active .search-wrap {
   flex-wrap: wrap;
   justify-content: center;
   max-width: 620px;
-  margin-top: 10px;
+  margin-top: 8px;
   transition: opacity 0.3s;
 }
 .site {
@@ -383,19 +390,19 @@ body.search-active .search-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(30, 30, 35, 0.5);
+  background: rgba(30, 30, 35, 0.55);
   backdrop-filter: blur(30px) saturate(180%);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border: 0.5px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border: 0.5px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   color: #fff;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .site:hover .site-icon {
   transform: translateY(-4px) scale(1.08);
-  background: rgba(45, 45, 52, 0.65);
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  background: rgba(45, 45, 52, 0.7);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
 }
 .site-icon svg { width: 22px; height: 22px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
 .site-label {
@@ -408,6 +415,18 @@ body.search-active .search-wrap {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.site.add-btn .site-icon {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1.5px dashed rgba(255, 255, 255, 0.35) !important;
+  box-shadow: none !important;
+  color: rgba(255, 255, 255, 0.85);
+}
+.site.add-btn:hover .site-icon {
+  background: rgba(255, 255, 255, 0.22) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  color: #ffffff;
+  transform: translateY(-4px) scale(1.08);
 }
 .site-delete-badge {
   position: absolute;
@@ -424,13 +443,13 @@ body.search-active .search-wrap {
 }
 body.edit-sites-mode .site:not(.add-btn) .site-delete-badge { display: flex; }
 
-/* Bottom Bar */
+/* Bottom Bar & The macOS Dock */
 .bottombar {
   position: fixed;
-  bottom: 12px;
+  bottom: 0;
   left: 0;
   right: 0;
-  padding: 0 24px;
+  padding: 0 20px 14px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -439,7 +458,7 @@ body.edit-sites-mode .site:not(.add-btn) .site-delete-badge { display: flex; }
   box-sizing: border-box;
 }
 
-/* Brave Stats Widget */
+/* Left: Brave Privacy Stats Widget */
 .stats-panel {
   pointer-events: auto;
   display: flex;
@@ -452,6 +471,7 @@ body.edit-sites-mode .site:not(.add-btn) .site-delete-badge { display: flex; }
   padding: 8px 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   gap: 12px;
+  flex-shrink: 0;
 }
 .stat {
   display: flex;
@@ -474,17 +494,21 @@ body.edit-sites-mode .site:not(.add-btn) .site-delete-badge { display: flex; }
   margin-top: 2px;
 }
 
-/* The macOS Dock */
+/* Center: The macOS Dock */
 .qa-row {
   pointer-events: auto;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12px;
   display: flex;
   align-items: center;
   background: rgba(30, 30, 35, 0.45);
   backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  border: 0.5px solid rgba(255, 255, 255, 0.22);
   border-radius: 20px;
-  padding: 6px 10px;
+  padding: 6px 12px;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
   gap: 8px;
 }
@@ -512,7 +536,7 @@ body.edit-sites-mode .site:not(.add-btn) .site-delete-badge { display: flex; }
 }
 .qa-btn svg { width: 18px; height: 18px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
 
-/* Weather Card */
+/* Right: Live Weather Widget */
 .weather-card {
   pointer-events: auto;
   display: flex;
@@ -527,6 +551,8 @@ body.edit-sites-mode .site:not(.add-btn) .site-delete-badge { display: flex; }
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   min-width: 170px;
   cursor: default;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 .wx-emoji { font-size: 22px; display: flex; align-items: center; justify-content: center; }
 .wx-emoji svg { width: 26px; height: 26px; }
