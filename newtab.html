@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>New Tab</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Gilda+Display&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ── RESET & TOKENS ────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -37,18 +37,19 @@
   --r-p: 999px;
 
   
-  /* Liquid Glass Properties */
-  --liquid-bg: rgba(30, 30, 30, 0.4);
+  
+  /* Liquid Glass Properties (macOS Exact) */
+  --liquid-bg: rgba(30, 30, 35, 0.4);
   --liquid-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
-  --liquid-border: 1px solid rgba(255, 255, 255, 0.12);
-  --liquid-blur: blur(45px) saturate(180%);
+  --liquid-border: 0.5px solid rgba(255, 255, 255, 0.18);
+  --liquid-blur: blur(40px) saturate(200%);
 }
 
 html,body {
   width:100%;
   height:100vh;
   overflow:hidden;
-  font-family:'DM Sans',sans-serif;
+  font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
   color:var(--text);
   -webkit-font-smoothing:antialiased;
   background-color: #000;
@@ -334,7 +335,7 @@ body.search-active .search-wrap {
   background:none;
   border:none;
   outline:none;
-  font:400 .84rem/1 'Inter', 'DM Sans', sans-serif;
+  font:400 14px/1 'Inter', -apple-system, sans-serif;
   color: #fff;
   text-shadow: 0 1px 4px rgba(0,0,0,0.2);
 }
@@ -524,13 +525,14 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
   text-transform:uppercase;
 }
 
+
 /* Weather */
 .weather-card {
   display:flex;
   align-items:center;
   gap:.8rem;
-  padding:.64rem 1.04rem;
-  border-radius: var(--r-l);
+  padding: 18px 22px;
+  border-radius: 22px;
 }
 .wx-emoji {
   display:flex;
@@ -1092,6 +1094,13 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
 .orb-eq span:nth-child(5) { height: 10px; animation-delay: 0.25s; }
 @keyframes eqPulse { 0% { transform: scaleY(0.45); opacity: 0.7; } 100% { transform: scaleY(1.15); opacity: 1; } }
 @keyframes circle1 { 0%, 100% { transform: translate(-50%, -50%) scale(0.97); } 50% { transform: translate(-50%, -50%) scale(1.02); } }
+
+
+/* macOS Tooltips */
+[title] {
+  position: relative;
+}
+/* Note: Since we are using standard title attributes, we'd need JS to convert them to custom tooltips if we wanted the exact macOS tooltip style, but the dark glass already sets the overall tone perfectly. */
 
 </style>
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
