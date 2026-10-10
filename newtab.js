@@ -86,22 +86,26 @@ const QUOTES = [
 ];
 
 let baseWallpapers = [
-  { id:1, name:'Sunrise Peak', time:'morning', url:'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=2560&auto=format&fit=crop' },
-  { id:2, name:'Misty Forest', time:'morning', url:'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2560&auto=format&fit=crop' },
-  { id:3, name:'Soft Hills', time:'morning', url:'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2560&auto=format&fit=crop' },
-  { id:4, name:'Morning Shore', time:'morning', url:'https://images.unsplash.com/photo-1476610182048-1748d550c776?q=80&w=2560&auto=format&fit=crop' },
-  { id:5, name:'Sunny Beach', time:'afternoon', url:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2560&auto=format&fit=crop' },
-  { id:6, name:'Blue Mountains', time:'afternoon', url:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2560&auto=format&fit=crop' },
-  { id:7, name:'Ocean View', time:'afternoon', url:'https://images.unsplash.com/photo-1436891620584-47fd0e565afb?q=80&w=2560&auto=format&fit=crop' },
-  { id:8, name:'Clear Desert', time:'afternoon', url:'https://images.unsplash.com/photo-1518182170546-076616fdfaaf?q=80&w=2560&auto=format&fit=crop' },
-  { id:9, name:'Sunset Horizon', time:'evening', url:'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=2560&auto=format&fit=crop' },
-  { id:10, name:'City Twilight', time:'evening', url:'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=2560&auto=format&fit=crop' },
-  { id:11, name:'Golden Street', time:'evening', url:'https://images.unsplash.com/photo-1501139083538-0139583c060f?q=80&w=2560&auto=format&fit=crop' },
-  { id:12, name:'Pink Sunset', time:'evening', url:'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2560&auto=format&fit=crop' },
-  { id:13, name:'Starry Sky', time:'night', url:'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2560&auto=format&fit=crop' },
-  { id:14, name:'Dark City', time:'night', url:'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=2560&auto=format&fit=crop' },
-  { id:15, name:'Neon Lights', time:'night', url:'https://images.unsplash.com/photo-1507608616785-3e0e58569508?q=80&w=2560&auto=format&fit=crop' },
-  { id:16, name:'Forest Night', time:'night', url:'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?q=80&w=2560&auto=format&fit=crop' }
+  // Morning (Clean & Light)
+  { id:1, name:'Minimal Dawn', time:'morning', url:'https://images.unsplash.com/photo-1508615039623-a25605d2b022?q=80&w=2560&auto=format&fit=crop' },
+  { id:2, name:'Soft Gradient', time:'morning', url:'https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=2560&auto=format&fit=crop' },
+  { id:3, name:'White Architecture', time:'morning', url:'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=2560&auto=format&fit=crop' },
+  { id:4, name:'Clean Waves', time:'morning', url:'https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?q=80&w=2560&auto=format&fit=crop' },
+  // Afternoon (Bright & Abstract)
+  { id:5, name:'Abstract Liquid', time:'afternoon', url:'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2560&auto=format&fit=crop' },
+  { id:6, name:'Smooth Waves', time:'afternoon', url:'https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?q=80&w=2560&auto=format&fit=crop' },
+  { id:7, name:'Vibrant Colors', time:'afternoon', url:'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2560&auto=format&fit=crop' },
+  { id:8, name:'Blue Glass', time:'afternoon', url:'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=2560&auto=format&fit=crop' },
+  // Evening (Muted & Warm)
+  { id:9, name:'Warm Dunes', time:'evening', url:'https://images.unsplash.com/photo-1509316785289-025f5b846b35?q=80&w=2560&auto=format&fit=crop' },
+  { id:10, name:'Muted Gradient', time:'evening', url:'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2560&auto=format&fit=crop' },
+  { id:11, name:'Dusk Minimal', time:'evening', url:'https://images.unsplash.com/photo-1510519138130-218121650821?q=80&w=2560&auto=format&fit=crop' },
+  { id:12, name:'Sunset Horizon', time:'evening', url:'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=2560&auto=format&fit=crop' },
+  // Night (Dark & Sleek)
+  { id:13, name:'Dark Matter', time:'night', url:'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2560&auto=format&fit=crop' },
+  { id:14, name:'Deep Ocean', time:'night', url:'https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=2560&auto=format&fit=crop' },
+  { id:15, name:'Neon Edge', time:'night', url:'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?q=80&w=2560&auto=format&fit=crop' },
+  { id:16, name:'Black Texture', time:'night', url:'https://images.unsplash.com/photo-1604871000636-074fa5117945?q=80&w=2560&auto=format&fit=crop' }
 ];
 
 /* ─────────────────────────────────────────────────────
