@@ -86,26 +86,13 @@ const QUOTES = [
 ];
 
 let baseWallpapers = [
-  // Morning (Clean & Light)
-  { id:1, name:'Minimal Dawn', time:'morning', url:'https://images.unsplash.com/photo-1508615039623-a25605d2b022?q=80&w=2560&auto=format&fit=crop' },
-  { id:2, name:'Soft Gradient', time:'morning', url:'https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=2560&auto=format&fit=crop' },
-  { id:3, name:'White Architecture', time:'morning', url:'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=2560&auto=format&fit=crop' },
-  { id:4, name:'Clean Waves', time:'morning', url:'https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?q=80&w=2560&auto=format&fit=crop' },
-  // Afternoon (Bright & Abstract)
-  { id:5, name:'Abstract Liquid', time:'afternoon', url:'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2560&auto=format&fit=crop' },
-  { id:6, name:'Smooth Waves', time:'afternoon', url:'https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?q=80&w=2560&auto=format&fit=crop' },
-  { id:7, name:'Vibrant Colors', time:'afternoon', url:'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2560&auto=format&fit=crop' },
-  { id:8, name:'Blue Glass', time:'afternoon', url:'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=2560&auto=format&fit=crop' },
-  // Evening (Muted & Warm)
-  { id:9, name:'Warm Dunes', time:'evening', url:'https://images.unsplash.com/photo-1509316785289-025f5b846b35?q=80&w=2560&auto=format&fit=crop' },
-  { id:10, name:'Muted Gradient', time:'evening', url:'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2560&auto=format&fit=crop' },
-  { id:11, name:'Dusk Minimal', time:'evening', url:'https://images.unsplash.com/photo-1510519138130-218121650821?q=80&w=2560&auto=format&fit=crop' },
-  { id:12, name:'Sunset Horizon', time:'evening', url:'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=2560&auto=format&fit=crop' },
-  // Night (Dark & Sleek)
-  { id:13, name:'Dark Matter', time:'night', url:'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2560&auto=format&fit=crop' },
-  { id:14, name:'Deep Ocean', time:'night', url:'https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=2560&auto=format&fit=crop' },
-  { id:15, name:'Neon Edge', time:'night', url:'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?q=80&w=2560&auto=format&fit=crop' },
-  { id:16, name:'Black Texture', time:'night', url:'https://images.unsplash.com/photo-1604871000636-074fa5117945?q=80&w=2560&auto=format&fit=crop' }
+  { id:1, name:'Minimal Waves', time:'morning', url:'Backgrounds/Wallpaper.png' },
+  { id:2, name:'Abstract Flow', time:'afternoon', url:'Backgrounds/bg.png' },
+  { id:3, name:'MacBook Studio', time:'afternoon', url:'Backgrounds/MacBook.png' },
+  { id:4, name:'Dark Geometric', time:'night', url:'Backgrounds/5479108.jpg' },
+  { id:5, name:'Neon Horizon', time:'night', url:'Backgrounds/wallpaper_hd_1.png' },
+  { id:6, name:'Windows Flow', time:'morning', url:'Backgrounds/Windows.jpeg' },
+  { id:7, name:'Root Studio', time:'evening', url:'Backgrounds/logo%20root.png' }
 ];
 
 /* ─────────────────────────────────────────────────────
@@ -152,11 +139,18 @@ let customWps = load('custom_wps', []);
 if (!Array.isArray(customWps)) customWps = [];
 customWps.forEach(wp => WALLPAPERS.push(wp));
 
-let rotation = load('wp_rotation', [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]);
-if (!Array.isArray(rotation) || rotation.length === 0) rotation = [1];
+let defaultRotation = baseWallpapers.map(w => w.id);
+let savedRotation = load('wp_rotation', defaultRotation);
+let rotation = (Array.isArray(savedRotation) && savedRotation.length > 0)
+  ? savedRotation.filter(id => WALLPAPERS.some(w => w.id === id))
+  : defaultRotation;
+if (!rotation.length) rotation = defaultRotation;
 
 let timeWpEnabled  = load('wp_time_auto', true);
 let currentWP      = load('wp_current', 0);
+if (typeof currentWP !== 'number' || currentWP >= rotation.length || currentWP < 0) {
+  currentWP = 0;
+}
 let engine         = load('searchEngine', 'brave');
 let isEditSitesMode = false;
 
