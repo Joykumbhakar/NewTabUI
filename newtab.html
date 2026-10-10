@@ -23,6 +23,12 @@
   --mac-min: #ffbd2e;
   --mac-max: #27c93f;
 
+  --ios-blue: #0078FE;
+  --ios-blue-hover: #0066D6;
+  --orb-core: radial-gradient(circle at 30% 25%, #38bdf8 0%, #0284c7 35%, #1d4ed8 72%, #091536 100%);
+  --orb-shadow: 0 28px 64px -12px rgba(0, 0, 0, 0.65), 0 10px 28px -6px rgba(0, 120, 254, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+
+
 
   /* Liquid Glass Radii — scaled 20% down */
   --r-s: 13px;
@@ -30,14 +36,12 @@
   --r-l: 29px;
   --r-p: 999px;
 
+  
   /* Liquid Glass Properties */
-  --liquid-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.02) 100%);
-  --liquid-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
-                   inset 0 1px 2px rgba(255, 255, 255, 0.3),
-                   inset 0 -1px 2px rgba(0, 0, 0, 0.1),
-                   inset 1px 0 2px rgba(255, 255, 255, 0.15);
-  --liquid-border: 1px solid rgba(255, 255, 255, 0.15);
-  --liquid-blur: blur(25px) saturate(190%);
+  --liquid-bg: rgba(30, 30, 30, 0.4);
+  --liquid-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  --liquid-border: 1px solid rgba(255, 255, 255, 0.12);
+  --liquid-blur: blur(45px) saturate(180%);
 }
 
 html,body {
@@ -306,6 +310,7 @@ body.search-active .search-wrap {
   transform: scale(1.05) translateY(-5px) translateZ(0);
 }
 
+
 .search-box {
   display:flex;
   align-items:center;
@@ -313,21 +318,16 @@ body.search-active .search-wrap {
   padding:.88rem 1.2rem;
   border-radius:14px;
   position:relative;
-  transition: box-shadow 0.3s, background 0.3s;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(45px) saturate(180%);
-  -webkit-backdrop-filter: blur(45px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+  transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
 }
 .search-box:hover {
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.22);
+  background: rgba(45, 45, 45, 0.5);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4);
 }
 .search-ico {
-  color: #1d1d1f;
+  color: var(--t80);
   flex-shrink:0;
-  filter: none;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 .search-input {
   flex:1;
@@ -335,11 +335,11 @@ body.search-active .search-wrap {
   border:none;
   outline:none;
   font:400 .84rem/1 'Inter', 'DM Sans', sans-serif;
-  color: #1d1d1f;
-  text-shadow: none;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
 }
 .search-input::placeholder {
-  color: #6e6e73;
+  color: var(--t80);
 }
 .engine-pill {
   display:flex;
@@ -347,35 +347,21 @@ body.search-active .search-wrap {
   gap:.32rem;
   padding:.28rem .64rem;
   border-radius:100px;
-  background: rgba(0,0,0,0.06);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: none;
-  border: 1px solid transparent;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
   font-size:.52rem;
   font-weight:500;
-  color: #1d1d1f;
+  color: #fff;
   cursor:pointer;
   flex-shrink:0;
   transition: background 0.2s;
 }
 .engine-pill:hover {
-  background: rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.15);
 }
-
-.engine-icon {
-  width:14px;
-  height:14px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-shrink:0;
-  color:#fff;
-}
-.engine-icon svg { width:100%; height:100%; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
 
 /* Autocomplete & History */
+
 
 .ac {
   position:absolute;
@@ -383,10 +369,10 @@ body.search-active .search-wrap {
   left:0;
   right:0;
   border-radius: 10px; padding: 5px;
-  background: rgba(255, 255, 255, 0.76);
+  background: rgba(30, 30, 30, 0.65);
   backdrop-filter: blur(40px) saturate(190%); -webkit-backdrop-filter: blur(40px) saturate(190%);
-  border: 0.5px solid rgba(0, 0, 0, 0.12);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
   overflow:hidden;
   display:none;
 }
@@ -395,15 +381,15 @@ body.search-active .search-wrap {
   padding: 6px 10px; border-radius: 6px; cursor: pointer; display: flex;
   align-items: center; gap:.52rem;
   transition: background 0.12s, color 0.12s;
-  font-size: 13px; color: #1d1d1f;
+  font-size: 13px; color: #fff;
 }
-.ac-item:hover { background: #0062e2; color: #ffffff; }
+.ac-item:hover { background: #0a84ff; color: #ffffff; }
 .ac-item:not(:last-child) { border-bottom:none; }
-.ac-item.history { color: #1d1d1f; }
+.ac-item.history { color: var(--orange); }
 .ac-item.history:hover { color: #ffffff; }
 .ac-hint {
   font-size: 11.5px;
-  color: rgba(0,0,0,0.42);
+  color: rgba(255,255,255,0.5);
   margin-left:auto;
 }
 .ac-item:hover .ac-hint { color: rgba(255,255,255,0.9); }
@@ -683,26 +669,7 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
   backdrop-filter:blur(8px);
 }
 
-.panel {
-  position:absolute;
-  right:1.2rem;
-  bottom:1.2rem;
-  width:288px;
-  border-radius:12px;
-  padding:0;
-  overflow-y:auto;
-  max-height:90vh;
-  transform:translateY(13px) scale(.97);
-  transition:transform .35s cubic-bezier(.22,1,.36,1);
-  background: rgba(255, 255, 255, 0.7); 
-  backdrop-filter: blur(45px) saturate(180%); 
-  -webkit-backdrop-filter: blur(45px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.8); 
-  color: #1d1d1f;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22), 0 0 0 0.5px rgba(255, 255, 255, 0.3);
-}
 
-.overlay.open 
 .panel {
   position:absolute;
   right:1.2rem;
@@ -714,12 +681,12 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
   max-height:90vh;
   transform:translateY(13px) scale(.97);
   transition:transform .35s cubic-bezier(.22,1,.36,1);
-  background: rgba(255, 255, 255, 0.7); 
+  background: rgba(30, 30, 30, 0.65); 
   backdrop-filter: blur(45px) saturate(180%); 
   -webkit-backdrop-filter: blur(45px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.8); 
-  color: #1d1d1f;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22), 0 0 0 0.5px rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12); 
+  color: #fff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
 }
 
 .panel.modal-center {
@@ -728,18 +695,20 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
   width:336px;
 }
 
+
 .panel-hdr {
   height: 52px; 
   display: flex; 
   align-items: center; 
   padding: 0 16px; 
-  border-bottom: 1px solid var(--mac-border); 
-  background: rgba(255, 255, 255, 0.35); 
+  border-bottom: 1px solid rgba(255,255,255,0.08); 
+  background: rgba(255, 255, 255, 0.05); 
   justify-content: space-between;
 }
 .panel-title {
-  font-size: 13px; font-weight: 600; color: #1d1d1f; text-shadow: none;
+  font-size: 13px; font-weight: 600; color: #fff; text-shadow: none;
 }
+
 .panel-close {
   display: none;
 }
@@ -758,6 +727,7 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
 
 
 
+
 .psec {
   padding: 0 1.2rem;
   margin-bottom:1.2rem;
@@ -768,7 +738,7 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
 .plbl {
   font-size:.52rem;
   font-weight:600;
-  color: #6e6e73;
+  color: var(--t80);
   letter-spacing:.05em;
   text-transform:uppercase;
   margin-bottom:.64rem;
@@ -1017,7 +987,114 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
 @keyframes slideUp {from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)}}
 .hidden { opacity:0!important; pointer-events:none!important; transition:opacity .4s ease; display: none !important; }
 
+
+/* Voice Globe Integration */
+.input-voice { display: none; }
+.label-voice {
+  position: absolute; right: 5.5rem; top: 50%; transform: translateY(-50%);
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  color: #6e6e73; cursor: pointer; z-index: 20; border-radius: 50%;
+  transition: all 0.48s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.label-voice:hover { color: var(--ios-blue); }
+.label-voice .icon-voice { position: absolute; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+
+.input-voice:checked ~ .label-voice {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(45px) saturate(180%);
+  -webkit-backdrop-filter: blur(45px) saturate(180%);
+  right: calc(50% - 152px);
+  width: 304px; height: 312px;
+  border-radius: 2.5rem;
+  box-shadow: var(--orb-shadow), 0 0 0 1px rgba(255,255,255,0.8);
+  transform: translateY(-110%) scale(1);
+  cursor: default;
+}
+.input-voice:checked ~ .label-voice .icon-voice { opacity: 0; transform: scale(0.5); pointer-events: none; }
+.input-voice:checked ~ .label-voice .text-voice > * { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+.label-voice .text-voice {
+  position: absolute; inset: 1.25rem; display: flex; flex-direction: column;
+  align-items: center; justify-content: space-between; pointer-events: none; z-index: 10;
+}
+.label-voice .text-voice > * {
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s; margin: 0;
+}
+
+.voice-header-row {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.08);
+}
+.voice-rec-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background-color: var(--ios-blue); box-shadow: 0 0 8px var(--ios-blue);
+  animation: recBlink 1.2s ease-in-out infinite;
+}
+@keyframes recBlink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.82); } }
+
+.voice-status-title {
+  font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em; color: transparent;
+  background-image: linear-gradient(-40deg, var(--mac-text) 0% 35%, var(--ios-blue) 45%, #38bdf8 50%, var(--ios-blue) 55%, var(--mac-text) 65% 100%);
+  background-clip: text; -webkit-background-clip: text; background-size: 800px;
+  animation: text-light 3.8s linear infinite; font-family: 'Inter', sans-serif;
+}
+@keyframes text-light { 0% { background-position: 0px; } 100% { background-position: 800px; } }
+
+.voice-timer-badge {
+  font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums;
+  color: var(--ios-blue); background: rgba(0, 120, 254, 0.12); padding: 1.5px 7px; border-radius: 999px;
+}
+.voice-actions-row { display: flex; align-items: center; gap: 6px; width: 100%; justify-content: center; }
+.voice-action-btn {
+  font-size: 11.5px; font-weight: 600; padding: 6px 11px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 4px; cursor: pointer; transition: all 0.2s ease; border: none; outline: none; font-family: 'Inter', sans-serif;
+}
+.voice-btn-cancel { color: #6e6e73; background: rgba(0,0,0, 0.05); }
+.voice-btn-cancel:hover { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+.voice-btn-text { color: var(--ios-blue); background: rgba(0, 120, 254, 0.10); }
+.voice-btn-text:hover { background: rgba(0, 120, 254, 0.18); }
+.voice-btn-send { color: #ffffff; background: var(--ios-blue); box-shadow: 0 4px 12px rgba(0, 120, 254, 0.32); }
+.voice-btn-send:hover { background: var(--ios-blue-hover); transform: translateY(-1px); }
+
+/* Globe Animations */
+.ai {
+  --s: 250px; --p: calc(var(--s) / 4); width: var(--s); aspect-ratio: 1; padding: var(--p);
+  display: grid; place-items: center; position: absolute; left: 50%; top: 48%; transform: translate(-50%, -50%);
+  animation: circle1 5s ease-in-out infinite; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+}
+.input-voice:checked ~ .label-voice .ai { opacity: 1; transition-delay: 0.1s; }
+.ai::before, .ai::after {
+  content: ""; position: absolute; top: 50%; left: 50%; width: 52%; height: 52%; border-radius: 50%;
+  border: 1.5px solid rgba(0, 120, 254, 0.38); box-shadow: 0 0 24px rgba(0, 120, 254, 0.20);
+  transform: translate(-50%, -50%); animation: wave 2.1s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+.ai::after { animation-delay: 0.7s; }
+@keyframes wave { 0% { transform: translate(-50%, -50%) scale(0.98); opacity: 0.85; } 100% { transform: translate(-50%, -50%) scale(1.56); opacity: 0; } }
+@keyframes ai1 { 0% { transform: rotate(0deg) translate(45%) scale(0.95); opacity: 0.5; } 25% { transform: rotate(90deg) translate(45%) scale(1.65); opacity: 1; } 50% { transform: rotate(180deg) translate(45%) scale(0.8); opacity: 0.55; } 75% { transform: rotate(270deg) translate(45%) scale(1.3); opacity: 1; } 100% { transform: rotate(360deg) translate(45%) scale(0.95); opacity: 0.5; } }
+@keyframes ai2 { 0% { transform: rotate(90deg) translate(42%) scale(0.65); opacity: 0.9; } 25% { transform: rotate(180deg) translate(42%) scale(1.55); opacity: 0.35; } 50% { transform: rotate(270deg) translate(42%) scale(1.05); opacity: 0.8; } 75% { transform: rotate(360deg) translate(42%) scale(0.85); opacity: 0.4; } 100% { transform: rotate(450deg) translate(42%) scale(0.65); opacity: 0.9; } }
+@keyframes ai3 { 0% { transform: rotate(180deg) translate(44%) scale(0.85); opacity: 0.85; } 25% { transform: rotate(270deg) translate(44%) scale(1.45); opacity: 0.6; } 50% { transform: rotate(360deg) translate(44%) scale(0.7); opacity: 0.5; } 75% { transform: rotate(450deg) translate(44%) scale(1.3); opacity: 0.85; } 100% { transform: rotate(540deg) translate(44%) scale(0.85); opacity: 0.85; } }
+@keyframes ai4 { 0% { transform: rotate(270deg) translate(40%) scale(1); opacity: 0.95; } 25% { transform: rotate(360deg) translate(40%) scale(0.8); opacity: 0.65; } 50% { transform: rotate(450deg) translate(40%) scale(1.5); opacity: 0.6; } 75% { transform: rotate(540deg) translate(40%) scale(0.95); opacity: 0.9; } 100% { transform: rotate(630deg) translate(40%) scale(1); opacity: 0.95; } }
+.ai .c { position: absolute; width: 220px; aspect-ratio: 1; border-radius: 50%; filter: blur(7px); }
+.ai .c1 { background: radial-gradient(50% 50% at center, #60a5fa, #0078FE); width: 170px; animation: ai1 5.2s linear infinite; }
+.ai .c2 { background: radial-gradient(50% 50% at center, #ffffff, #bae6fd); width: 95px; animation: ai2 5.8s linear infinite; }
+.ai .c3 { background: radial-gradient(50% 50% at center, #38bdf8, transparent); width: 140px; animation: ai3 4.6s linear infinite; }
+.ai .c4 { background: radial-gradient(50% 50% at center, #1d4ed8, #1e3a8a); width: 160px; animation: ai4 5.0s linear infinite; }
+.ai .container { overflow: hidden; background: var(--orb-core); width: 100%; border-radius: 50%; aspect-ratio: 1; position: relative; display: grid; place-items: center; box-shadow: 0 14px 34px -6px rgba(0, 120, 254, 0.38), inset 0 0 18px rgba(0, 50, 140, 0.35); }
+.ai .glass { overflow: hidden; position: absolute; inset: calc(var(--p) - 2px); border-radius: 50%; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 14px 32px rgba(0, 120, 254, 0.18), inset 0 2px 10px rgba(255, 255, 255, 0.92), inset 0 -8px 18px rgba(56, 189, 248, 0.42); background: radial-gradient(62px at 32% 24%, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.12) 55%, transparent 75%); display: flex; align-items: center; justify-content: center; }
+.orb-eq { display: flex; align-items: center; justify-content: center; gap: 3.5px; height: 28px; z-index: 4; }
+.orb-eq span { width: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.92); box-shadow: 0 0 8px rgba(255, 255, 255, 0.6); animation: eqPulse 0.85s ease-in-out infinite alternate; }
+.orb-eq span:nth-child(1) { height: 9px; animation-delay: 0.0s; }
+.orb-eq span:nth-child(2) { height: 18px; animation-delay: 0.15s; }
+.orb-eq span:nth-child(3) { height: 24px; animation-delay: 0.3s; }
+.orb-eq span:nth-child(4) { height: 15px; animation-delay: 0.12s; }
+.orb-eq span:nth-child(5) { height: 10px; animation-delay: 0.25s; }
+@keyframes eqPulse { 0% { transform: scaleY(0.45); opacity: 0.7; } 100% { transform: scaleY(1.15); opacity: 1; } }
+@keyframes circle1 { 0%, 100% { transform: translate(-50%, -50%) scale(0.97); } 50% { transform: translate(-50%, -50%) scale(1.02); } }
+
 </style>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
 
@@ -1041,7 +1118,7 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
           <div class="tl-btn tl-min" style="width:12px;height:12px;border-radius:50%;background-color:var(--mac-min);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(0,0,0,0.12);"></div>
           <div class="tl-btn tl-max" style="width:12px;height:12px;border-radius:50%;background-color:var(--mac-max);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(0,0,0,0.12);"></div>
       </div>
-      <span class="panel-title" style="font-size: 13px; font-weight: 600; color: #1d1d1f; text-shadow: none;">Assign Wallpaper Time</span>
+      <span class="panel-title" style="font-size: 13px; font-weight: 600; color: #fff; text-shadow: none;">Assign Wallpaper Time</span>
       <div style="width:52px;"></div>
     </div>
     <img id="uploadPreview" style="width:100%; height:112px; object-fit:cover; border-radius:6px; margin-bottom:.8rem;">
@@ -1072,7 +1149,7 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
           <div class="tl-btn tl-min" style="width:12px;height:12px;border-radius:50%;background-color:var(--mac-min);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(0,0,0,0.12);"></div>
           <div class="tl-btn tl-max" style="width:12px;height:12px;border-radius:50%;background-color:var(--mac-max);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(0,0,0,0.12);"></div>
       </div>
-      <span class="panel-title" style="font-size: 13px; font-weight: 600; color: #1d1d1f; text-shadow: none;">Add Shortcut</span>
+      <span class="panel-title" style="font-size: 13px; font-weight: 600; color: #fff; text-shadow: none;">Add Shortcut</span>
       <div style="width:52px;"></div>
     </div>
     <div class="modal-input-group">
@@ -1104,7 +1181,7 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
           <div class="tl-btn tl-min" style="width:12px;height:12px;border-radius:50%;background-color:var(--mac-min);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(0,0,0,0.12);"></div>
           <div class="tl-btn tl-max" style="width:12px;height:12px;border-radius:50%;background-color:var(--mac-max);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(0,0,0,0.12);"></div>
       </div>
-      <span class="panel-title" style="font-size: 13px; font-weight: 600; color: #1d1d1f; text-shadow: none;">Keyboard Shortcuts</span>
+      <span class="panel-title" style="font-size: 13px; font-weight: 600; color: #fff; text-shadow: none;">Keyboard Shortcuts</span>
       <div style="width:52px;"></div>
     </div>
     <div class="hk-grid">
@@ -1128,7 +1205,7 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
           <div class="tl-btn tl-min" style="width:12px;height:12px;border-radius:50%;background-color:var(--mac-min);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(0,0,0,0.12);"></div>
           <div class="tl-btn tl-max" style="width:12px;height:12px;border-radius:50%;background-color:var(--mac-max);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(0,0,0,0.12);"></div>
       </div>
-      <span class="panel-title" style="font-size: 13px; font-weight: 600; color: #1d1d1f; text-shadow: none;">Customize</span>
+      <span class="panel-title" style="font-size: 13px; font-weight: 600; color: #fff; text-shadow: none;">Customize</span>
       <div style="width:52px;"></div>
     </div>
 
@@ -1215,6 +1292,51 @@ body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
       <form class="search-box liquid" id="searchForm" autocomplete="off">
         <svg class="search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input class="search-input" id="si" placeholder="Search or enter address…" spellcheck="false">
+        
+        <!-- Voice Input Checkbox (Hidden) -->
+        <input type="checkbox" name="input-voice" id="input-voice" class="input-voice" />
+        
+        <!-- Voice Globe / Mic Button -->
+        <label for="input-voice" class="label-voice" title="Record Voice Message">
+            <!-- Mic Icon -->
+            <svg class="icon-voice" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M12 4v16m4-13v10M8 7v10m12-6v2M4 11v2"></path>
+            </svg>
+            
+            <div class="ai">
+                <div class="container">
+                    <div class="c c4"></div>
+                    <div class="c c1"></div>
+                    <div class="c c2"></div>
+                    <div class="c c3"></div>
+                </div>
+                <div class="glass">
+                    <div class="orb-eq">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-voice">
+                <div class="voice-header-row">
+                    <span class="voice-rec-dot"></span>
+                    <span id="voice-status-text" class="voice-status-title">Listening...</span>
+                    <span id="voice-timer" class="voice-timer-badge">0:01</span>
+                </div>
+                <div class="voice-actions-row">
+                    <button type="button" id="voice-cancel-btn" class="voice-action-btn voice-btn-cancel">
+                        <i class="ph-bold ph-x text-[11px]" style="font-size:11px;"></i> Cancel
+                    </button>
+                    <button type="button" id="voice-transcribe-btn" class="voice-action-btn voice-btn-text">
+                        <i class="ph-bold ph-text-aa text-[12px]" style="font-size:12px;"></i> Text
+                    </button>
+                    <button type="button" id="voice-send-btn" class="voice-action-btn voice-btn-send">
+                        <i class="ph-bold ph-paper-plane-right text-[11px]" style="font-size:11px;"></i> Search
+                    </button>
+                </div>
+            </div>
+        </label>
+
         <div class="engine-pill" id="enginePill">
           <div class="engine-icon" id="engineIcon"></div>
           <span id="engineName">Brave</span>
