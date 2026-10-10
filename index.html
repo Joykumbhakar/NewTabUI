@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Photo Editor</title>
+  <style>
+    /* =========================================
+       User Provided Styles (Uiverse.io by revanth-004)
+       ========================================= */
+    .center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .design {
+      height: 200px;
+      width: 200px;
+      border-radius: 40px;
+      background: rgb(255, 11, 0);
+      background: linear-gradient(
+        180deg,
+        rgba(255, 11, 0, 1) 13%,
+        rgba(255, 158, 0, 1) 100%
+      );
+      position: relative;
+      overflow: hidden;
+    }
+    .color-border {
+      border-radius: 50%;
+      background-color: #ffffff20;
+      box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+    }
+    .circle-1 {
+      height: 220px;
+      width: 220px;
+      position: absolute;
+      right: -50px;
+      top: -50px;
+    }
+    .circle-2 {
+      height: 180px;
+      width: 180px;
+    }
+    .circle-3 {
+      height: 140px;
+      width: 140px;
+    }
+    .circle-4 {
+      height: 105px;
+      width: 105px;
+    }
+    .circle-5 {
+      height: 70px;
+      width: 70px;
+      border-radius: 50%;
+      background-color: #ffffff;
+    }
+    .shape {
+      height: 200px;
+      width: 200px;
+      background-color: #484848;
+      transform: rotate(45deg);
+      position: absolute;
+    }
+    .shadow {
+      box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.75);
+    }
+    .mountain-1 {
+      z-index: 1;
+      bottom: -100px;
+      left: -100px;
+    }
+    .mountain-2 {
+      bottom: -110px;
+      left: -30px;
+    }
+    .mountain-3 {
+      z-index: 2;
+      bottom: -150px;
+      left: 90px;
+    }
+
+    /* =========================================
+       Editor App Styles
+       ========================================= */
+    :root {
+      --bg-color: #0f1015;
+      --panel-bg: #1a1c23;
+      --panel-border: #2a2d39;
+      --text-main: #f0f0f0;
+      --text-muted: #8e92a4;
+      --accent: #5372F0;
+      --accent-hover: #3b5bdb;
+      --danger: #e74c3c;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app-container {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 1100px;
+      height: calc(100vh - 40px);
+      background: var(--panel-bg);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      border: 1px solid var(--panel-border);
+    }
+
+    /* Sidebar controls */
+    .sidebar {
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+      transition: opacity 0.3s;
+    }
+
+    .sidebar.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.03);
+      padding: 18px;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+    }
+
+    .panel h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filter-grid, .transform-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button {
+      background: transparent;
+      border: 1px solid var(--panel-border);
+      color: var(--text-muted);
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--text-main);
+    }
+
+    button.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .slider-container {
+      margin-top: 20px;
+    }
+
+    .slider-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 5px;
+      background: var(--panel-border);
+      border-radius: 5px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    }
+
+    .action-group {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .action-group button {
+      flex: 1;
+      padding: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-reset {
+      border-color: var(--panel-border);
+    }
+    
+    .btn-reset:hover {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: white;
+    }
+
+    .btn-save {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .btn-save:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Main Preview Area */
+    .preview-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      border: 1px dashed var(--panel-border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-header {
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--panel-border);
+      background: var(--panel-bg);
+      z-index: 10;
+    }
+
+    .preview-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .btn-choose {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+    }
+
+    .btn-choose:hover {
+      background: var(--accent-hover);
+    }
+
+    .canvas-wrapper {
+      flex: 1;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    .placeholder-wrapper {
+      text-align: center;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .placeholder-text {
+      font-size: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 850px) {
+      .app-container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+      }
+      .sidebar {
+        width: 100%;
+      }
+      .preview-area {
+        min-height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Sidebar / Controls -->
+    <aside class="sidebar disabled" id="sidebar">
+      <!-- Filters -->
+      <div class="panel">
+        <h3>Filters</h3>
+        <div class="filter-grid" id="filter-grid">
+          <button class="active" data-filter="brightness">Brightness</button>
+          <button data-filter="saturation">Saturation</button>
+          <button data-filter="inversion">Inversion</button>
+          <button data-filter="grayscale">Grayscale</button>
+          <button data-filter="contrast">Contrast</button>
+          <button data-filter="sepia">Sepia</button>
+          <button data-filter="blur">Blur</button>
+          <button data-filter="hue">Hue Rotate</button>
+        </div>
+        
+        <div class="slider-container">
+          <div class="slider-info">
+            <span id="filter-name">Brightness</span>
+            <span id="filter-value">100%</span>
+          </div>
+          <input type="range" id="filter-slider" min="0" max="200" value="100">
+        </div>
+      </div>
+
+      <!-- Transforms -->
+      <div class="panel">
+        <h3>Transform</h3>
+        <div class="transform-grid">
+          <button id="rot-left">↺ Left</button>
+          <button id="rot-right">↻ Right</button>
+          <button id="flip-h">⟷ Flip X</button>
+          <button id="flip-v">↕ Flip Y</button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="action-group">
+        <button class="btn-reset" id="reset-btn">Reset</button>
+        <button class="btn-save" id="save-btn">Save Image</button>
+      </div>
+    </aside>
+
+    <!-- Preview Area -->
+    <main class="preview-area">
+      <div class="preview-header">
+        <h2>Photo Studio</h2>
+        <button class="btn-choose" id="choose-img-btn">Choose Image</button>
+        <input type="file" id="file-input" accept="image/*" hidden>
+      </div>
+
+      <div class="canvas-wrapper center">
+        
+        <!-- Default Placeholder (Using User's Uiverse Design) -->
+        <div class="placeholder-wrapper" id="placeholder">
+          <div class="center">
+            <div class="design">
+              <div class="circle-1 center color-border">
+                <div class="circle-2 center color-border">
+                  <div class="circle-3 center color-border">
+                    <div class="circle-4 center color-border">
+                      <div class="circle-5"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="mountain-1 shape shadow"></div>
+              <div class="mountain-2 shape"></div>
+              <div class="mountain-3 shape shadow"></div>
+            </div>
+          </div>
+          <div class="placeholder-text">Load an image to start editing</div>
+        </div>
+
+        <!-- Working Canvas -->
+        <canvas id="canvas" style="display: none;"></canvas>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // --- DOM Elements ---
+    const fileInput = document.getElementById('file-input');
+    const chooseImgBtn = document.getElementById('choose-img-btn');
+    const sidebar = document.getElementById('sidebar');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const placeholder = document.getElementById('placeholder');
+    
+    // Filters UI
+    const filterButtons = document.querySelectorAll('#filter-grid button');
+    const filterName = document.getElementById('filter-name');
+    const filterValue = document.getElementById('filter-value');
+    const filterSlider = document.getElementById('filter-slider');
+    
+    // Transform UI
+    const rotLeftBtn = document.getElementById('rot-left');
+    const rotRightBtn = document.getElementById('rot-right');
+    const flipHBtn = document.getElementById('flip-h');
+    const flipVBtn = document.getElementById('flip-v');
+
+    // Action UI
+    const resetBtn = document.getElementById('reset-btn');
+    const saveBtn = document.getElementById('save-btn');
+
+    // --- State Variables ---
+    let image = null;
+    let currentFilter = 'brightness';
+
+    // Default Settings
+    const defaultFilters = {
+      brightness: 100, saturation: 100, inversion: 0, grayscale: 0,
+      contrast: 100, sepia: 0, blur: 0, hue: 0
+    };
+    const defaultTransforms = { rotate: 0, flipH: 1, flipV: 1 };
+
+    let filters = { ...defaultFilters };
+    let transforms = { ...defaultTransforms };
+
+    // --- Event Listeners ---
+
+    // 1. File Upload
+    chooseImgBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      image = new Image();
+      image.src = URL.createObjectURL(file);
+      image.onload = () => {
+        sidebar.classList.remove('disabled');
+        placeholder.style.display = 'none';
+        canvas.style.display = 'block';
+        resetState();
+      }
+    });
+
+    // 2. Filter Selection & Slider
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelector('#filter-grid .active').classList.remove('active');
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        
+        filterName.innerText = btn.innerText;
+        filterSlider.value = filters[currentFilter];
+
+        // Configure slider boundaries based on selected filter
+        switch (currentFilter) {
+          case 'blur': filterSlider.max = '20'; break;
+          case 'hue': filterSlider.max = '360'; break;
+          case 'inversion':
+          case 'grayscale':
+          case 'sepia': filterSlider.max = '100'; break;
+          default: filterSlider.max = '200'; break;
+        }
+        
+        updateSliderUI();
+      });
+    });
+
+    filterSlider.addEventListener('input', () => {
+      filters[currentFilter] = filterSlider.value;
+      updateSliderUI();
+      renderImage();
+    });
+
+    // 3. Transformations
+    rotLeftBtn.addEventListener('click', () => { transforms.rotate -= 90; renderImage(); });
+    rotRightBtn.addEventListener('click', () => { transforms.rotate += 90; renderImage(); });
+    flipHBtn.addEventListener('click', () => { transforms.flipH *= -1; renderImage(); });
+    flipVBtn.addEventListener('click', () => { transforms.flipV *= -1; renderImage(); });
+
+    // 4. Actions
+    resetBtn.addEventListener('click', resetState);
+    saveBtn.addEventListener('click', saveImage);
+
+
+    // --- Core Functions ---
+
+    function updateSliderUI() {
+      const val = filters[currentFilter];
+      if (currentFilter === 'blur') filterValue.innerText = `${val}px`;
+      else if (currentFilter === 'hue') filterValue.innerText = `${val}°`;
+      else filterValue.innerText = `${val}%`;
+    }
+
+    function resetState() {
+      filters = { ...defaultFilters };
+      transforms = { ...defaultTransforms };
+      
+      // Reset slider to currently selected tab
+      filterSlider.value = filters[currentFilter];
+      updateSliderUI();
+      renderImage();
+    }
+
+    function renderImage() {
+      if (!image) return;
+
+      // Swap width/height if rotated 90 or 270 degrees
+      if (transforms.rotate % 180 !== 0) {
+        canvas.width = image.naturalHeight;
+        canvas.height = image.naturalWidth;
+      } else {
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+      }
+
+      // Apply CSS Filters to Canvas Context
+      ctx.filter = `
+        brightness(${filters.brightness}%) 
+        saturate(${filters.saturation}%) 
+        invert(${filters.inversion}%) 
+        grayscale(${filters.grayscale}%) 
+        contrast(${filters.contrast}%) 
+        sepia(${filters.sepia}%) 
+        blur(${filters.blur}px) 
+        hue-rotate(${filters.hue}deg)
+      `;
+
+      // Translate context to center for transformations
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      
+      if (transforms.rotate !== 0) {
+        ctx.rotate(transforms.rotate * Math.PI / 180);
+      }
+      
+      ctx.scale(transforms.flipH, transforms.flipV);
+
+      // Draw image (offset by negative half of its original dimensions)
+      ctx.drawImage(
+        image, 
+        -image.naturalWidth / 2, 
+        -image.naturalHeight / 2, 
+        image.naturalWidth, 
+        image.naturalHeight
+      );
+    }
+
+    function saveImage() {
+      if (!image) return;
+      const link = document.createElement('a');
+      link.download = 'edited-photo.jpg';
+      // Convert canvas to data URL (JPEG format)
+      link.href = canvas.toDataURL('image/jpeg', 0.9);
+      link.click();
+    }
+  </script>
+</body>
+</html>

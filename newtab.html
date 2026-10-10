@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Tab</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Gilda+Display&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & TOKENS ────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange: #ff6b35;
+  --text: #ffffff;
+  --t80: rgba(255, 255, 255, 0.80);
+  --t55: rgba(255, 255, 255, 0.55);
+  --t35: rgba(255, 255, 255, 0.35);
+
+  /* Liquid Glass Radii — scaled 20% down */
+  --r-s: 13px;
+  --r-m: 22px;
+  --r-l: 29px;
+  --r-p: 999px;
+
+  /* Liquid Glass Properties */
+  --liquid-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.02) 100%);
+  --liquid-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                   inset 0 1px 2px rgba(255, 255, 255, 0.3),
+                   inset 0 -1px 2px rgba(0, 0, 0, 0.1),
+                   inset 1px 0 2px rgba(255, 255, 255, 0.15);
+  --liquid-border: 1px solid rgba(255, 255, 255, 0.15);
+  --liquid-blur: blur(25px) saturate(190%);
+}
+
+html,body {
+  width:100%;
+  height:100vh;
+  overflow:hidden;
+  font-family:'DM Sans',sans-serif;
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  background-color: #000;
+}
+
+/* ── WALLPAPER LAYERS ──────────────────────────────── */
+#wallpaperA, #wallpaperB {
+  position:fixed;
+  inset:0;
+  z-index:0;
+  transition:opacity 1.4s cubic-bezier(.4,0,.2,1);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+#wallpaperB { opacity:0; }
+
+.vignette {
+  position:fixed;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background: radial-gradient(ellipse 115% 115% at 50% 50%, transparent 35%, rgba(0,0,0,0.6) 100%);
+}
+#bgCanvas {
+  position:fixed;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+}
+.grain {
+  position:fixed;
+  inset:0;
+  z-index:3;
+  pointer-events:none;
+  opacity:.15;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E");
+}
+
+/* ── PAGE LAYOUT & FOCUS MODE ──────────────────────── */
+.page {
+  position:relative;
+  z-index:4;
+  width:100%;
+  height:100vh;
+  display:grid;
+  grid-template-rows:45px 1fr auto;
+}
+
+body.focus-mode .topbar,
+body.focus-mode .bottombar,
+body.focus-mode .topsites,
+body.focus-mode .greeting,
+body.focus-mode .sticky-note {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ── LIQUID GLASS UTILITY CLASS ────────────────────── */
+.liquid {
+  background: var(--liquid-bg);
+  backdrop-filter: var(--liquid-blur);
+  -webkit-backdrop-filter: var(--liquid-blur);
+  border: var(--liquid-border);
+  box-shadow: var(--liquid-shadow);
+}
+
+/* ── GLOBAL ACTIVE STATES ───────────────────────────── */
+button:active,
+.site:active,
+.wp-thumb:active,
+.shields:active,
+.engine-pill:active,
+.ac-item:active,
+.icon-option:active {
+  transform: scale(0.96);
+  transition: transform 0.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+button, .site, .wp-thumb, .shields, .engine-pill, .ac-item, .icon-option {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s, border-color 0.3s, opacity 0.3s, box-shadow 0.3s;
+}
+
+/* ── TOAST NOTIFICATIONS ───────────────────────────── */
+.toast-container {
+  position: fixed;
+  top: 1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  pointer-events: none;
+}
+.toast {
+  padding: 0.48rem 0.96rem;
+  border-radius: var(--r-p);
+  font-size: 0.6rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text);
+  animation: toastIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+             toastOut 0.3s cubic-bezier(0.22, 1, 0.36, 1) 2.7s forwards;
+}
+.toast svg { width: 11px; height: 11px; }
+@keyframes toastIn { from{opacity:0;transform:translateY(-8px) scale(0.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+@keyframes toastOut { from{opacity:1;transform:scale(1)} to{opacity:0;transform:scale(0.95)} }
+
+/* ── TOPBAR ────────────────────────────────────────── */
+.topbar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:.8rem 1.2rem;
+  transition: opacity 0.4s;
+  animation:slideDown .5s cubic-bezier(.22,1,.36,1) both;
+}
+.shields {
+  display:flex;
+  align-items:center;
+  gap:.48rem;
+  padding:.32rem .72rem .32rem .56rem;
+  border-radius:var(--r-p);
+  font-size:.6rem;
+  font-weight:500;
+  color:var(--text);
+  cursor:pointer;
+  /* Liquid glass blur */
+  backdrop-filter: var(--liquid-blur);
+  -webkit-backdrop-filter: var(--liquid-blur);
+}
+.shields-count {
+  background:var(--orange);
+  color:#fff;
+  font-size:.48rem;
+  font-weight:700;
+  padding:.12rem .36rem;
+  border-radius:var(--r-p);
+  min-width:14px;
+  text-align:center;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
+}
+.tb-right {
+  display:flex;
+  align-items:center;
+  gap:.4rem;
+}
+.tb-btn {
+  display:flex;
+  align-items:center;
+  gap:.4rem;
+  padding:.4rem .8rem;
+  border-radius:var(--r-p);
+  font-size:.6rem;
+  font-weight:500;
+  color:var(--text);
+  cursor:pointer;
+  font-family:inherit;
+  border:none;
+  /* Liquid glass blur (also gets .liquid class in HTML) */
+}
+
+/* ── CENTER ────────────────────────────────────────── */
+.center {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:0 .8rem;
+}
+.greeting {
+  font-style:italic;
+  font-size:.75rem;
+  font-weight:300;
+  color:var(--t80);
+  letter-spacing:.02em;
+  margin-bottom:.8rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transition: opacity 0.4s;
+  animation:fadeUp .6s .05s cubic-bezier(.22,1,.36,1) both;
+}
+.quote-text {
+  font-weight: 200;
+  color: var(--t55);
+}
+
+/* Clock */
+.clock-wrap {
+  text-align:center;
+  margin-bottom:2rem;
+  transition: opacity 0.4s;
+  animation:fadeUp .6s .1s cubic-bezier(.22,1,.36,1) both;
+}
+.clock {
+  font-family:'Gilda Display',serif;
+  font-size:clamp(4.5rem, 12vw, 10rem);
+  line-height:1;
+  letter-spacing:-.025em;
+  color:#fff;
+  text-shadow: 0 12px 48px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+}
+.clock-colon {
+  animation:colonBlink 1s step-start infinite;
+}
+.clock-sec, .clock-ampm {
+  font-size: clamp(1.2rem, 3.2vw, 2.4rem);
+  margin-left: .4rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  color: var(--t80);
+}
+.clock-sec.hidden, .clock-ampm.hidden { display: none; }
+@keyframes colonBlink { 50% { opacity:.3 } }
+.clock-date {
+  font-size:.68rem;
+  font-weight:400;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--t80);
+  margin-top:.8rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* ── SEARCH BAR ZOOM & BLUR ────────────────────────── */
+.search-focus-overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+body.search-active .search-focus-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.search-wrap {
+  width:min(480px, 90vw);
+  margin-bottom:2rem;
+  position:relative;
+  z-index: 5;
+  animation:fadeUp .6s .16s cubic-bezier(.22,1,.36,1) both;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+body.search-active .search-wrap {
+  z-index: 50;
+  transform: scale(1.05) translateY(-5px) translateZ(0);
+}
+.search-box {
+  display:flex;
+  align-items:center;
+  gap:.64rem;
+  padding:.88rem 1.2rem;
+  border-radius:var(--r-p);
+  position:relative;
+  transition: box-shadow 0.3s, background 0.3s;
+  /* liquid glass applied via .liquid class */
+}
+.search-box:hover {
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255, 255, 255, 0.4), inset 0 -1px 2px rgba(0, 0, 0, 0.1), inset 1px 0 2px rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+}
+.search-ico {
+  color:var(--t80);
+  flex-shrink:0;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+.search-input {
+  flex:1;
+  background:none;
+  border:none;
+  outline:none;
+  font:400 .84rem/1 'DM Sans',sans-serif;
+  color:#fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.search-input::placeholder {
+  color:var(--t80);
+}
+.engine-pill {
+  display:flex;
+  align-items:center;
+  gap:.32rem;
+  padding:.28rem .64rem;
+  border-radius:var(--r-p);
+  background: rgba(255,255,255,0.12);
+  /* Liquid glass blur */
+  backdrop-filter: var(--liquid-blur);
+  -webkit-backdrop-filter: var(--liquid-blur);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.15);
+  font-size:.52rem;
+  font-weight:500;
+  color:var(--text);
+  cursor:pointer;
+  flex-shrink:0;
+  letter-spacing:.03em;
+}
+.engine-icon {
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  color:#fff;
+}
+.engine-icon svg { width:100%; height:100%; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+/* Autocomplete & History */
+.ac {
+  position:absolute;
+  top:calc(100% + 10px);
+  left:0;
+  right:0;
+  border-radius:var(--r-m);
+  background:rgba(8,12,22,.60);
+  backdrop-filter: var(--liquid-blur);
+  -webkit-backdrop-filter: var(--liquid-blur);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 20px 60px rgba(0,0,0,.65);
+  overflow:hidden;
+  display:none;
+}
+.ac.show { display:block; }
+.ac-item {
+  display:flex;
+  align-items:center;
+  gap:.52rem;
+  padding:.64rem .88rem;
+  cursor:pointer;
+  font-size:.72rem;
+  color:var(--t80);
+}
+.ac-item.sel { background:rgba(255,255,255,.12); }
+.ac-item:not(:last-child) { border-bottom:1px solid rgba(255,255,255,.05); }
+.ac-item.history { color: var(--orange); }
+.ac-hint {
+  font-size:.56rem;
+  color:var(--t35);
+  margin-left:auto;
+}
+
+/* Top sites & Drag Reorder */
+.topsites {
+  display:flex;
+  gap:1.2rem;
+  flex-wrap:wrap;
+  justify-content:center;
+  width:min(520px, 92vw);
+  transition: opacity 0.4s;
+  animation:fadeUp .6s .22s cubic-bezier(.22,1,.36,1) both;
+}
+.site {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.64rem;
+  cursor:pointer;
+  text-decoration:none;
+  position:relative;
+}
+.site.dragging { opacity: 0.4; }
+.site.drag-over .site-icon { transform: scale(1.1); box-shadow: 0 0 15px rgba(255,107,53,0.5); border-color: var(--orange); }
+
+.site-icon {
+  width:52px;
+  height:52px;
+  border-radius:var(--r-m);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: var(--liquid-bg);
+  backdrop-filter: var(--liquid-blur);
+  -webkit-backdrop-filter: var(--liquid-blur);
+  border: var(--liquid-border);
+  box-shadow: var(--liquid-shadow);
+  color: var(--text);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.site-icon svg {
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+.site-label {
+  font-size:.56rem;
+  font-weight:500;
+  color:var(--t80);
+  text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  max-width:58px;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.site-delete-badge {
+  position:absolute;
+  top:-4px; right:-4px;
+  width:18px; height:18px;
+  background:#ff4a4a;
+  border-radius:50%;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,0.5);
+  z-index:10;
+}
+.site-delete-badge svg { width:10px; height:10px; }
+
+body.edit-sites-mode .site:not(.add-btn) .site-delete-badge { display:flex; }
+body.edit-sites-mode .site:not(.add-btn) .site-icon { border-color: #ff4a4a; }
+
+.site:hover .site-icon {
+  box-shadow: 0 0 20px rgba(255,255,255,0.25), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+  border-color: rgba(255,255,255,0.4);
+}
+
+/* ── BOTTOM BAR ────────────────────────────────────── */
+.bottombar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 1.2rem 1.2rem;
+  gap:.8rem;
+  transition: opacity 0.4s;
+  animation:slideUp .5s .15s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* Stats */
+.stats-panel {
+  display:flex;
+  align-items:stretch;
+  border-radius: var(--r-l);
+  overflow: hidden;
+}
+.stat {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:.64rem .96rem;
+  gap:.1rem;
+  border-right:1px solid rgba(255,255,255,0.1);
+  cursor:default;
+}
+.stat:last-child {
+  border-right:none;
+}
+.stat-top {
+  display:flex;
+  align-items:baseline;
+  gap:.24rem;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.stat-num {
+  font-size:.88rem;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+  line-height:1;
+}
+.stat-unit {
+  font-size:.52rem;
+  color:var(--t80);
+}
+.stat-lbl {
+  font-size:.48rem;
+  color:var(--t80);
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+
+/* Weather */
+.weather-card {
+  display:flex;
+  align-items:center;
+  gap:.8rem;
+  padding:.64rem 1.04rem;
+  border-radius: var(--r-l);
+}
+.wx-emoji {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+.wx-emoji svg {
+  width:29px; height:29px;
+}
+.wx-body {
+  display:flex;
+  flex-direction:column;
+  gap:.1rem;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.wx-temp {
+  font-size:1.04rem;
+  font-weight:500;
+  line-height:1;
+}
+.wx-desc {
+  font-size:.56rem;
+  color:var(--t80);
+}
+.wx-loc {
+  font-size:.48rem;
+  color:var(--t80);
+}
+.wx-extra {
+  display:none;
+  flex-direction:column;
+  gap:.14rem;
+  padding-left:.8rem;
+  border-left:1px solid rgba(255,255,255,.15);
+}
+.wx-row {
+  font-size:.5rem;
+  color:var(--t80);
+  display:flex;
+  gap:.28rem;
+  align-items:center;
+}
+.wx-row svg { width:10px; height:10px; }
+
+/* Quick action buttons */
+.qa-row {
+  display:flex;
+  gap:.56rem;
+  align-items:center;
+}
+.qa-btn {
+  width:35px;
+  height:35px;
+  border-radius:var(--r-m);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text);
+  cursor:pointer;
+  border:none;
+  /* Liquid glass (also gets .liquid class in HTML) */
+}
+.qa-btn svg {
+  width:14px;
+  height:14px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+/* ── QUICK STICKY NOTE ─────────────────────────────── */
+.sticky-note {
+  position: absolute;
+  right: 1.2rem;
+  bottom: 4.4rem;
+  width: 240px;
+  height: 240px;
+  border-radius: var(--r-l);
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(16px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: bottom right;
+  z-index: 100;
+}
+.sticky-note.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+.sticky-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.64rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--t80);
+}
+.sticky-area {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  resize: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+/* ── OVERLAYS & MODALS ─────────────────────────────── */
+.overlay {
+  position:fixed;
+  inset:0;
+  z-index:200;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .3s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.overlay.open {
+  opacity:1;
+  pointer-events:auto;
+}
+.overlay-bg {
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.3);
+  backdrop-filter:blur(8px);
+}
+.panel {
+  position:absolute;
+  right:1.2rem;
+  bottom:1.2rem;
+  width:288px;
+  border-radius:var(--r-l);
+  padding:1.2rem;
+  overflow-y:auto;
+  max-height:90vh;
+  transform:translateY(13px) scale(.97);
+  transition:transform .35s cubic-bezier(.22,1,.36,1);
+}
+.overlay.open .panel {
+  transform:translateY(0) scale(1);
+}
+.panel.modal-center {
+  position:relative;
+  right:auto; bottom:auto;
+  width:336px;
+}
+.panel-hdr {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:1.2rem;
+}
+.panel-title {
+  font-size:.76rem;
+  font-weight:500;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.panel-close {
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  border:none;
+  color:var(--text);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:inherit;
+  /* liquid glass applied via .liquid class */
+}
+.psec {
+  margin-bottom:1.2rem;
+}
+.plbl {
+  font-size:.52rem;
+  font-weight:500;
+  color:var(--t80);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-bottom:.64rem;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* Wallpaper grid & actions */
+.wp-grid {
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:.32rem;
+  margin-bottom:.64rem;
+}
+.wp-thumb {
+  aspect-ratio:16/9;
+  border-radius:6px;
+  cursor:pointer;
+  position:relative;
+  border:2px solid transparent;
+  overflow:hidden;
+  box-shadow:0 2px 10px rgba(0,0,0,.3);
+  background-size: cover;
+  background-position: center;
+}
+.wp-thumb.active { border-color:rgba(255,255,255,.75); }
+.wp-check {
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,107,53,.4);
+  opacity:0;
+  transition:opacity .2s;
+  border-radius:inherit;
+}
+.wp-thumb.in-rotation .wp-check { opacity:1; }
+.wp-dot {
+  position:absolute;
+  bottom:2px; right:2px;
+  width:5px; height:5px;
+  border-radius:50%;
+  background:var(--orange);
+  box-shadow:0 0 5px var(--orange);
+  display:none;
+}
+.wp-thumb.in-rotation .wp-dot { display:block; }
+
+.wp-time-badge {
+  position:absolute;
+  top:2px; left:2px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 3px;
+  padding: 2px;
+  backdrop-filter: blur(4px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color: var(--t80);
+}
+.wp-time-badge svg { width:10px; height:10px; }
+
+.wp-actions {
+  display:flex;
+  gap:.4rem;
+  margin-bottom:.8rem;
+}
+.wp-actions .eng-btn {
+  flex:1;
+  text-align:center;
+  padding:.32rem;
+}
+#fileUpload { display:none; }
+
+/* Toggle rows */
+.trow {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:.48rem 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.trow:last-child {
+  border-bottom:none;
+}
+.trow-name {
+  font-size:.64rem;
+  color:var(--text);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* Pill toggle — liquid glass */
+.ptoggle {
+  width:32px;
+  height:18px;
+  border-radius:var(--r-p);
+  background:rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,0.15);
+  /* Liquid glass blur */
+  backdrop-filter: var(--liquid-blur);
+  -webkit-backdrop-filter: var(--liquid-blur);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.1);
+  cursor:pointer;
+  position:relative;
+}
+.ptoggle.on {
+  background: rgba(255, 107, 53, 0.7);
+  border-color: rgba(255, 107, 53, 0.5);
+  backdrop-filter: var(--liquid-blur);
+  -webkit-backdrop-filter: var(--liquid-blur);
+}
+.ptoggle::after {
+  content:'';
+  position:absolute;
+  top:2px;
+  left:2px;
+  width:13px;
+  height:13px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.3);
+  transition:transform .28s cubic-bezier(.22,1,.36,1);
+}
+.ptoggle.on::after {
+  transform:translateX(14px);
+}
+
+/* Buttons — liquid glass */
+.eng-btn {
+  padding:.4rem .72rem;
+  border-radius:var(--r-p);
+  font-size:.6rem;
+  font-weight: 500;
+  color:var(--text);
+  cursor:pointer;
+  font-family:inherit;
+  border: 1px solid rgba(255,255,255,0.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.32rem;
+  /* Liquid glass blur */
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: var(--liquid-blur);
+  -webkit-backdrop-filter: var(--liquid-blur);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.15);
+}
+.eng-btn.active {
+  background: rgba(255, 107, 53, 0.35);
+  border-color: rgba(255, 107, 53, 0.55);
+  box-shadow: inset 0 1px 2px rgba(255, 107, 53, 0.8), 0 4px 12px rgba(255, 107, 53, 0.2);
+}
+.eng-row {
+  display:flex;
+  gap:.4rem;
+  flex-wrap:wrap;
+}
+
+/* Custom Upload & Shortcut Modals */
+.modal-input-group {
+  margin-bottom:.96rem;
+}
+.modal-input-group label {
+  display:block;
+  font-size:.56rem;
+  color:var(--t80);
+  margin-bottom:.4rem;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+.modal-input {
+  width:100%;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.2);
+  padding:.6rem;
+  border-radius:6px;
+  color:#fff;
+  font-family:inherit;
+  font-size:.72rem;
+  outline:none;
+  transition: border-color 0.3s, background 0.3s;
+  /* Liquid glass blur on inputs */
+  backdrop-filter: var(--liquid-blur);
+  -webkit-backdrop-filter: var(--liquid-blur);
+}
+.modal-input:focus {
+  border-color:var(--orange);
+  background:rgba(255,255,255,0.12);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+}
+.icon-picker-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(30px, 1fr));
+  gap:.4rem;
+  max-height:144px;
+  overflow-y:auto;
+  padding-right:.4rem;
+  margin-bottom:1.2rem;
+}
+.icon-option {
+  width:30px;
+  height:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:6px;
+  cursor:pointer;
+  background:rgba(255,255,255,0.05);
+  border:1px solid transparent;
+  color: var(--t80);
+}
+.icon-option svg { width:16px; height:16px; }
+.icon-option.selected {
+  background:rgba(255,107,53,0.3);
+  border-color:var(--orange);
+  color:#fff;
+}
+.modal-actions {
+  display:flex;
+  justify-content:flex-end;
+  gap:.48rem;
+}
+.time-picker {
+  display:flex;
+  gap:.32rem;
+  flex-wrap:wrap;
+  margin-bottom:1.2rem;
+}
+.time-picker svg { width:11px; height:11px; }
+
+/* Help Keybinds Modal */
+.hk-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .8rem;
+}
+.hk-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.64rem;
+  color: var(--t80);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: .4rem;
+}
+.hk-key {
+  background: rgba(255,255,255,0.15);
+  padding: .16rem .4rem;
+  border-radius: 3px;
+  color: #fff;
+  font-family: monospace;
+  font-weight: bold;
+  /* Liquid glass blur on keys */
+  backdrop-filter: var(--liquid-blur);
+  -webkit-backdrop-filter: var(--liquid-blur);
+}
+
+/* ── ANIMATIONS ────────────────────────────────────── */
+@keyframes fadeUp {from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown {from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp {from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)}}
+.hidden { opacity:0!important; pointer-events:none!important; transition:opacity .4s ease; display: none !important; }
+
+</style>
+</head>
+<body>
+
+<!-- Toasts -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Background -->
+<div id="wallpaperA"></div>
+<div id="wallpaperB"></div>
+<div class="vignette"></div>
+<canvas id="bgCanvas"></canvas>
+<div class="grain"></div>
+
+<!-- Upload Custom Wallpaper Modal -->
+<div class="overlay" id="uploadWpModal">
+  <div class="overlay-bg" id="closeUploadWpModalBg"></div>
+  <div class="panel liquid modal-center">
+    <div class="panel-hdr">
+      <span class="panel-title">Assign Wallpaper Time</span>
+      <button class="panel-close liquid" id="closeUploadWpModalBtn">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
+      </button>
+    </div>
+    <img id="uploadPreview" style="width:100%; height:112px; object-fit:cover; border-radius:6px; margin-bottom:.8rem;">
+    <div class="modal-input-group">
+      <label>When should this wallpaper appear?</label>
+      <div class="time-picker" id="uploadTimePicker">
+        <button class="eng-btn active" data-time="any" id="upBtnAny">Any</button>
+        <button class="eng-btn" data-time="morning" id="upBtnMorning">Morning</button>
+        <button class="eng-btn" data-time="afternoon" id="upBtnAfternoon">Afternoon</button>
+        <button class="eng-btn" data-time="evening" id="upBtnEvening">Evening</button>
+        <button class="eng-btn" data-time="night" id="upBtnNight">Night</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="eng-btn" id="cancelUploadWpBtn">Cancel</button>
+      <button class="eng-btn active" id="saveUploadWpBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Shortcut Modal -->
+<div class="overlay" id="shortcutModal">
+  <div class="overlay-bg" id="closeShortcutModalBg"></div>
+  <div class="panel liquid modal-center">
+    <div class="panel-hdr">
+      <span class="panel-title">Add Shortcut</span>
+      <button class="panel-close liquid" id="closeShortcutModalBtn">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
+      </button>
+    </div>
+    <div class="modal-input-group">
+      <label>Name</label>
+      <input type="text" id="shortcutName" class="modal-input" placeholder="e.g. Dribbble" autocomplete="off">
+    </div>
+    <div class="modal-input-group">
+      <label>URL</label>
+      <input type="text" id="shortcutUrl" class="modal-input" placeholder="dribbble.com" autocomplete="off">
+    </div>
+    <div class="modal-input-group">
+      <label>Select Icon</label>
+      <div class="icon-picker-grid" id="iconPickerGrid"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="eng-btn" id="cancelShortcutBtn">Cancel</button>
+      <button class="eng-btn active" id="saveShortcutBtn">Save Shortcut</button>
+    </div>
+  </div>
+</div>
+
+<!-- Help Overlay -->
+<div class="overlay" id="helpModal">
+  <div class="overlay-bg" id="closeHelpModalBg"></div>
+  <div class="panel liquid modal-center">
+    <div class="panel-hdr">
+      <span class="panel-title">Keyboard Shortcuts</span>
+      <button class="panel-close liquid" id="closeHelpModalBtn">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
+      </button>
+    </div>
+    <div class="hk-grid">
+      <div class="hk-item"><span>Next Wallpaper</span> <span class="hk-key">→ / ↓</span></div>
+      <div class="hk-item"><span>Prev Wallpaper</span> <span class="hk-key">← / ↑</span></div>
+      <div class="hk-item"><span>Focus Mode</span> <span class="hk-key">F</span></div>
+      <div class="hk-item"><span>Sticky Note</span> <span class="hk-key">S</span></div>
+      <div class="hk-item"><span>Shortcuts Help</span> <span class="hk-key">?</span></div>
+      <div class="hk-item"><span>Close Modals</span> <span class="hk-key">Esc</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Customize overlay -->
+<div class="overlay" id="overlay">
+  <div class="overlay-bg" id="overlayBg"></div>
+  <div class="panel liquid">
+    <div class="panel-hdr">
+      <span class="panel-title">Customize</span>
+      <button class="panel-close liquid" id="panelClose">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
+      </button>
+    </div>
+
+    <div class="psec">
+      <div class="plbl">General Settings</div>
+      <div class="trow"><span class="trow-name">12-Hour Clock</span><button class="ptoggle setting-toggle" data-key="clock_12h"></button></div>
+      <div class="trow"><span class="trow-name">Show Seconds</span><button class="ptoggle setting-toggle" data-key="clock_sec"></button></div>
+      <div class="trow"><span class="trow-name">Focus Mode</span><button class="ptoggle setting-toggle" id="focusToggle" data-key="focus_mode"></button></div>
+    </div>
+
+    <!-- Wallpapers -->
+    <div class="psec">
+      <div class="plbl">Wallpapers</div>
+      <div class="wp-grid" id="wpGrid"></div>
+      <div class="wp-actions">
+        <button class="eng-btn" id="btnUploadWp">Upload Custom</button>
+        <button class="eng-btn" id="btnDeleteWp" style="display:none; color:#ff6b35;">Delete Custom</button>
+        <input type="file" id="fileUpload" accept="image/png, image/jpeg, image/webp">
+      </div>
+      <div class="trow"><span class="trow-name">Auto-change by Time of Day</span><button class="ptoggle" id="timeWpToggle"></button></div>
+    </div>
+
+    <!-- Widgets -->
+    <div class="psec">
+      <div class="plbl">Widgets Visibility</div>
+      <div class="trow"><span class="trow-name">Clock &amp; Date</span><button class="ptoggle widget-toggle" data-target="clock-wrap"></button></div>
+      <div class="trow"><span class="trow-name">Greeting &amp; Quote</span><button class="ptoggle widget-toggle" data-target="greeting"></button></div>
+      <div class="trow"><span class="trow-name">Brave Stats</span><button class="ptoggle widget-toggle" data-target="stats-panel"></button></div>
+      <div class="trow"><span class="trow-name">Weather</span><button class="ptoggle widget-toggle" data-target="weather-card"></button></div>
+      <div class="trow"><span class="trow-name">Shortcuts</span><button class="ptoggle widget-toggle" data-target="topsites"></button></div>
+      <div class="trow"><span class="trow-name">Edit Mode (Click to Delete / Drag)</span><button class="ptoggle" id="editSitesToggle"></button></div>
+    </div>
+
+    <!-- Search engine -->
+    <div class="psec">
+      <div class="plbl">Search Engine</div>
+      <div class="eng-row">
+        <button class="eng-btn active" data-engine="brave">Brave</button>
+        <button class="eng-btn" data-engine="google">Google</button>
+        <button class="eng-btn" data-engine="ddg">DuckDuckGo</button>
+        <button class="eng-btn" data-engine="bing">Bing</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Page -->
+<div class="page">
+
+  <!-- Search Focus Overlay -->
+  <div class="search-focus-overlay" id="searchFocusOverlay"></div>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="shields liquid" id="shieldsBtn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#ff6b35"><path d="M12 2L4 6v6c0 5.52 3.48 10.74 8 12 4.52-1.26 8-6.48 8-12V6l-8-4z"/></svg>
+      Shields Up
+      <span class="shields-count" id="shieldsCount">0</span>
+    </div>
+    <div class="tb-right">
+      <button class="tb-btn liquid" id="customizeBtn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Customize
+      </button>
+    </div>
+  </header>
+
+  <!-- Center -->
+  <main class="center">
+    <div class="greeting" id="greeting">
+      <span id="greetText">—</span> <span class="quote-text" id="quoteText"></span>
+    </div>
+
+    <div class="clock-wrap" id="clock-wrap">
+      <div class="clock">
+        <span id="clkH">00</span><span class="clock-colon">:</span><span id="clkM">00</span>
+        <span id="clkS" class="clock-sec hidden">00</span>
+        <span id="clkAmPm" class="clock-ampm hidden"></span>
+      </div>
+      <div class="clock-date" id="clkDate">—</div>
+    </div>
+
+    <div class="search-wrap" id="searchWrap">
+      <form class="search-box liquid" id="searchForm" autocomplete="off">
+        <svg class="search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" id="si" placeholder="Search or enter address…" spellcheck="false">
+        <div class="engine-pill" id="enginePill">
+          <div class="engine-icon" id="engineIcon"></div>
+          <span id="engineName">Brave</span>
+        </div>
+      </form>
+      <div class="ac" id="ac"></div>
+    </div>
+
+    <div class="topsites" id="topsites"></div>
+  </main>
+
+  <!-- Bottom bar -->
+  <footer class="bottombar">
+
+    <div class="stats-panel liquid" id="stats-panel">
+      <div class="stat">
+        <div class="stat-top">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="#ff6b35" style="margin-right:2px"><path d="M12 2L4 6v6c0 5.52 3.48 10.74 8 12 4.52-1.26 8-6.48 8-12V6l-8-4z"/></svg>
+          <span class="stat-num" id="sAds">—</span>
+        </div>
+        <div class="stat-lbl">Ads Blocked</div>
+      </div>
+      <div class="stat">
+        <div class="stat-top"><span class="stat-num" id="sTrk">—</span></div>
+        <div class="stat-lbl">Trackers</div>
+      </div>
+      <div class="stat">
+        <div class="stat-top">
+          <span class="stat-num" id="sBw">—</span>
+          <span class="stat-unit" id="sBwU">MB</span>
+        </div>
+        <div class="stat-lbl">Saved</div>
+      </div>
+      <div class="stat">
+        <div class="stat-top">
+          <span class="stat-num" id="sTm">—</span>
+          <span class="stat-unit">min</span>
+        </div>
+        <div class="stat-lbl">Time Saved</div>
+      </div>
+    </div>
+
+    <div class="weather-card liquid" id="weather-card">
+      <div class="wx-emoji" id="wxIcon"></div>
+      <div class="wx-body">
+        <div class="wx-temp" id="wxTemp">—</div>
+        <div class="wx-desc" id="wxDesc">Loading…</div>
+        <div class="wx-loc" id="wxLoc">—</div>
+      </div>
+      <div class="wx-extra" id="wxExtra">
+        <div class="wx-row">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          <span id="wxHum">—</span>
+        </div>
+        <div class="wx-row">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+          <span id="wxWind">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="qa-row">
+      <button class="qa-btn liquid" id="btnHelp" title="Shortcuts Help">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+      </button>
+      <button class="qa-btn liquid" id="btnFocus" title="Toggle Focus Mode">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+      <button class="qa-btn liquid" id="btnSticky" title="Sticky Note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+      </button>
+      <button class="qa-btn liquid" id="btnCustomizeBottom" title="Customize">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <button class="qa-btn liquid" id="btnRefresh" title="Refresh">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+      <button class="qa-btn liquid" id="btnNextWp" title="Next wallpaper">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+  </footer>
+
+  <!-- Sticky Note -->
+  <div class="sticky-note liquid" id="stickyNoteWrapper">
+    <div class="sticky-header">
+      Quick Note
+      <button class="panel-close" style="width:16px;height:16px;" id="closeSticky">
+        <svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
+      </button>
+    </div>
+    <textarea class="sticky-area" id="stickyArea" placeholder="Jot something down..."></textarea>
+  </div>
+</div>
+
+<script src="newtab.js">
+</script>
+</body>
+</html>
