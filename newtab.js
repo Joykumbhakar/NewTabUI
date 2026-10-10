@@ -502,12 +502,9 @@ function closeUploadModal() {
   pendingUploadDataUrl = null;
 }
 
-const closeUploadWpModalBtn = document.getElementById('closeUploadWpModalBtn');
-if (closeUploadWpModalBtn) closeUploadWpModalBtn.addEventListener('click', closeUploadModal);
-const closeUploadWpModalBg = document.getElementById('closeUploadWpModalBg');
-if (closeUploadWpModalBg) closeUploadWpModalBg.addEventListener('click', closeUploadModal);
-const cancelUploadWpBtn = document.getElementById('cancelUploadWpBtn');
-if (cancelUploadWpBtn) cancelUploadWpBtn.addEventListener('click', closeUploadModal);
+document.getElementById('closeUploadWpModalBtn').addEventListener('click', closeUploadModal);
+document.getElementById('closeUploadWpModalBg').addEventListener('click', closeUploadModal);
+document.getElementById('cancelUploadWpBtn').addEventListener('click', closeUploadModal);
 
 document.getElementById('saveUploadWpBtn').addEventListener('click', () => {
   if(!pendingUploadDataUrl) return;
@@ -739,42 +736,6 @@ if (searchForm) {
   });
 }
 
-// Native SpeechRecognition for voice search
-const voiceCheckbox = document.getElementById('input-voice');
-if (voiceCheckbox && (window.SpeechRecognition || window.webkitSpeechRecognition)) {
-  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recognition = new SpeechRec();
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.lang = 'en-US';
-
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    if (siEl) {
-      siEl.value = transcript;
-      if (searchForm) {
-        searchForm.dispatchEvent(new Event('submit', { cancelable: true }));
-      }
-    }
-    voiceCheckbox.checked = false;
-  };
-
-  recognition.onerror = () => { voiceCheckbox.checked = false; };
-  recognition.onend = () => { voiceCheckbox.checked = false; };
-
-  voiceCheckbox.addEventListener('change', () => {
-    if (voiceCheckbox.checked) {
-      try {
-        recognition.start();
-      } catch (err) {
-        voiceCheckbox.checked = false;
-      }
-    } else {
-      recognition.stop();
-    }
-  });
-}
-
 /* ─────────────────────────────────────────────────────
    10. CUSTOM TOP SITES (WITH DRAG & DROP REORDER)
 ───────────────────────────────────────────────────── */
@@ -899,12 +860,9 @@ function closeShortcutModal() {
   shortcutModal.classList.remove('open');
 }
 
-const closeShortcutModalBtn = document.getElementById('closeShortcutModalBtn');
-if (closeShortcutModalBtn) closeShortcutModalBtn.addEventListener('click', closeShortcutModal);
-const closeShortcutModalBg = document.getElementById('closeShortcutModalBg');
-if (closeShortcutModalBg) closeShortcutModalBg.addEventListener('click', closeShortcutModal);
-const cancelShortcutBtn = document.getElementById('cancelShortcutBtn');
-if (cancelShortcutBtn) cancelShortcutBtn.addEventListener('click', closeShortcutModal);
+document.getElementById('closeShortcutModalBtn').addEventListener('click', closeShortcutModal);
+document.getElementById('closeShortcutModalBg').addEventListener('click', closeShortcutModal);
+document.getElementById('cancelShortcutBtn').addEventListener('click', closeShortcutModal);
 
 document.getElementById('saveShortcutBtn').addEventListener('click', () => {
   const name = document.getElementById('shortcutName').value.trim();
@@ -1067,10 +1025,8 @@ if (oBg) oBg.addEventListener('click', closePanel);
 const helpModal = document.getElementById('helpModal');
 const btnHelp = document.getElementById('btnHelp');
 if(btnHelp) btnHelp.addEventListener('click', () => helpModal.classList.add('open'));
-const closeHelpModalBtn = document.getElementById('closeHelpModalBtn');
-if (closeHelpModalBtn) closeHelpModalBtn.addEventListener('click', () => helpModal.classList.remove('open'));
-const closeHelpModalBg = document.getElementById('closeHelpModalBg');
-if (closeHelpModalBg) closeHelpModalBg.addEventListener('click', () => helpModal.classList.remove('open'));
+document.getElementById('closeHelpModalBtn').addEventListener('click', () => helpModal.classList.remove('open'));
+document.getElementById('closeHelpModalBg').addEventListener('click', () => helpModal.classList.remove('open'));
 
 const btnNextWp = document.getElementById('btnNextWp');
 if (btnNextWp) btnNextWp.addEventListener('click', () => nextWallpaper());
